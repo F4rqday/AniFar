@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
 
-    userName: {
+    username: {
         type: String,
         required: true, // cant pass without userName
         trim: true, // just remove whitespace 

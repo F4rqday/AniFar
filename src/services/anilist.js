@@ -1,4 +1,5 @@
-const ANILIST_URL = 'https://graphql.anilist.co';
+require('dotenv').config();
+const ANILIST_URL = process.env.ANILIST_API_URL;
 
 // Function to make a request to the Anilist GraphQL API
 async function anilistRequest(query, variables = {}){

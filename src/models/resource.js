@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const resourceSchema = new mongoose.Schemama({
+const resourceSchema = new mongoose.Schema({
 user:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'User',
