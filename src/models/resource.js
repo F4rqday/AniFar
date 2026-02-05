@@ -18,10 +18,12 @@ title: {
 
 },
 
-coverImage:{
-    type: String,
-    required:true
 
+notes: {type: String},
+
+
+coverImage:{
+    type: String
 }
 
 }, {timestamps:true}

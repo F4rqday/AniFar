@@ -83,6 +83,7 @@ exports.login = async (req, res, next) => {
 
 }
     catch(e){
+        //share this error with global error handler
         next(e)
     }
 

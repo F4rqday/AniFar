@@ -1,8 +1,8 @@
 const User = require('../models/users')
 const bcrypt = require('bcryptjs')
 
-// GET /api/users/profile (private)
-exports.getProfile = async (req, res) => {
+// GET /api/users/profile (private) need jwt
+exports.getProfile = async (req, res, next) => {
 try{
     // id of curent user
     const userId = req.user?.userId; // if req.user = true => userId=UserId , else => userId = undefined
@@ -23,7 +23,7 @@ catch(e){next(e);}
 
 
 
-// PUT /api/users/profile (private)
+// PUT /api/users/profile (private) need jwt
 exports.updateProfile = async (req, res, next) => {
     try{
         // id of curent user

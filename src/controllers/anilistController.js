@@ -28,6 +28,7 @@ exports.searchAnime = async (req, res, next) => {
         res.json({result: data.Page.media});
 
     } catch (e){
+        //share this error with global error handler
         next(e);
     }
 
@@ -57,7 +58,7 @@ exports.getAnimeById = async (req, res, next) => {
         const data = await anilistRequest(query, {id});
         res.json({anime: data.Media});
    
-    } catch (e){ next(e); }
+    } catch (e){ next(e); } //share this error with global error handler
 
 };
 

@@ -1,4 +1,3 @@
-// just creating base structure for resourceController.js
 const router = require('express').Router();
 const controller = require('../controllers/resourceController')
 const auth = require('../middleware/authMiddleware')
