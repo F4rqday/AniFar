@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AniFar</title>
+</head>
+
+<body>
+  <h1>AniFar</h1>
+
+  <p><b>Status:</b> <span id="authStatus">Not logged in</span></p>
+  <p>
+    <button id="btnLogout">Logout</button>
+  </p>
+
+  <table border="1" cellpadding="8" cellspacing="0" width="100%">
+    <tr valign="top">
+      <td width="50%">
+        <h3>AUTH</h3>
+
+        <h4>Register</h4>
+        <p>username<br><input id="regUsername" size="30"></p>
+        <p>email<br><input id="regEmail"  size="30"></p>
+        <p>password<br><input id="regPassword" type="password"  size="30"></p>
+        <p><button id="btnRegister">Register</button></p>
+
+        <hr>
+
+        <h4>Login</h4>
+        <p>email<br><input id="loginEmail"  size="30"></p>
+        <p>password<br><input id="loginPassword" type="password" size="30"></p>
+        <p><button id="btnLogin">Login</button></p>
+
+      </td>
+
+      <td width="50%">
+        <h3>PROFILE</h3>
+        <p><button id="btnGetProfile">Get My Profile</button></p>
+
+        <h4>Update profile</h4>
+        <p>new username (optional)<br><input id="updUsername" size="30"></p>
+        <p>new email (optional)<br><input id="updEmail" size="30"></p>
+        <p>new password (optional)<br><input id="updPassword" type="password" size="30"></p>
+        <p><button id="btnUpdateProfile">Update My Profile</button></p>
+      </td>
+    </tr>
+  </table>
+
+
+
+  <h2>RESOURCE CRUD</h2>
+
+  <table border="1" cellpadding="8" cellspacing="0" width="100%">
+    <tr valign="top">
+      <td width="50%">
+        <h4>Create</h4>
+        <p>anilistId (number)<br><input id="resAniListId" type="number" placeholder="20" size="30"></p>
+        <p>title<br><input id="resTitle" placeholder="Naruto" size="30"></p>
+        <p>coverImage (optional)<br><input id="resCoverImage"  size="30"></p>
+        <p>notes (optional)<br><textarea id="resNotes" rows="4" cols="33" placeholder="bla-bla-bla"></textarea></p>
+        <p><button id="btnResCreate">Add Anime</button></p>
+
+        <hr>
+
+        <h4>Get All</h4>
+        <p><button id="btnResGetAll">Get My Library</button></p>
+      </td>
+
+      <td width="50%">
+        <h4>By ID</h4>
+        <p>resourceId (_id from Mongo)<br><input id="resId" placeholder="_id" size="33"></p>
+        <p>
+          <button id="btnResGetOne">Get One</button>
+          <button id="btnResDelete">Delete</button>
+        </p>
+
+        <hr>
+
+        <h4>Update</h4>
+        <p>title (optional)<br><input id="updResTitle" placeholder="new title" size="30"></p>
+        <p>coverImage (optional)<br><input id="updResCoverImage" placeholder="new url" size="30"></p>
+        <p>notes (optional)<br><textarea id="updResNotes" rows="4" cols="33" placeholder="bla-bla-bla"></textarea></p>
+        <p><button id="btnResUpdate">Update This Anime</button></p>
+      </td>
+    </tr>
+  </table>
+
+
+  <h2>ANILIST (optional)</h2>
+  <p>
+    search q<br>
+    <input id="aniQ" placeholder="Naruto" size="35">
+    <button id="btnAniSearch">Search AniList</button>
+  </p>
+  <p>
+    anilist id<br>
+    <input id="aniId" placeholder="20" size="35">
+    <button id="btnAniById">Get AniList by id</button>
+  </p>
+
+  <hr>
+
+  <h2>OUTPUT</h2>
+  <pre id="out">Ready.</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function setOut(x) {
+    $("out").textContent = (typeof x === "string") ? x : JSON.stringify(x, null, 2);
+  }
+
+  function setToken(token) {
+    if (token) localStorage.setItem("jwt", token);
+    else localStorage.removeItem("jwt");
+    updateAuthStatus();
+  }
+
+  function getToken() {
+    return localStorage.getItem("jwt") || "";
+  }
+
+  function updateAuthStatus() {
+    $("authStatus").textContent = getToken() ? "Logged in" : "Not logged in";
+  }
+
+
+  async function api(path, { method="GET", body=null, auth=false } = {}) {
+    const headers = { "Content-Type": "application/json" };
+
+    if (auth) {
+      const token = getToken();
+      if (!token) throw new Error("Not authenticated. Please login.");
+      headers["Authorization"] = "Bearer " + token;
+    }
+
+    const res = await fetch(path, {
+      method,
+      headers,
+      credentials: "include", //
+      body: body ? JSON.stringify(body) : null
+    });
+
+    const ct = res.headers.get("content-type") || "";
+    const data = ct.includes("application/json")
+      ? await res.json().catch(() => ({}))
+      : await res.text();
+
+    if (!res.ok) {
+      const msg = (typeof data === "string")
+        ? data
+        : (data.message || JSON.stringify(data));
+      throw new Error(`${res.status} ${res.statusText}: ${msg}`);
+    }
+
+    return data;
+  }
+
+  // init 
+  updateAuthStatus();
+
+  // buttons
+  $("btnLogout").onclick = () => {
+    setToken("");
+    setOut("Logged out.");
+  };
+
+  $("btnRegister").onclick = async () => {
+    try {
+      const payload = {
+        username: $("regUsername").value.trim(),
+        email: $("regEmail").value.trim(),
+        password: $("regPassword").value
+      };
+      const data = await api("/api/auth/register", { method: "POST", body: payload });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnLogin").onclick = async () => {
+    try {
+      const payload = {
+        email: $("loginEmail").value.trim(),
+        password: $("loginPassword").value
+      };
+      const data = await api("/api/auth/login", { method: "POST", body: payload });
+
+
+      const token = data.token || data.accessToken || data.jwt || "";
+      if (!token) throw new Error("Login OK, but token not found in response (expected token/accessToken/jwt).");
+
+      setToken(token);
+      setOut({ login: "ok", user: data.user || null, raw: data });
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnGetProfile").onclick = async () => {
+    try {
+      const data = await api("/api/users/profile", { method: "GET", auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnUpdateProfile").onclick = async () => {
+    try {
+      const payload = {};
+      const u = $("updUsername").value.trim();
+      const em = $("updEmail").value.trim();
+      const pw = $("updPassword").value;
+
+
+      if (!u && !em && !pw) throw new Error("Nothing to update (all fields are empty)");
+
+
+      if (u) { payload.username = u; payload.name = u; }
+      if (em) payload.email = em;
+      if (pw) payload.password = pw;
+
+      const data = await api("/api/users/profile", { method: "PUT", body: payload, auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnResCreate").onclick = async () => {
+    try {
+      const payload = {
+        anilistId: Number($("resAniListId").value),
+        title: $("resTitle").value.trim(),
+        coverImage: $("resCoverImage").value.trim() || undefined,
+        notes: $("resNotes").value.trim() || undefined
+      };
+      const data = await api("/api/resource", { method: "POST", body: payload, auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnResGetAll").onclick = async () => {
+    try {
+      const data = await api("/api/resource", { method: "GET", auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnResGetOne").onclick = async () => {
+    try {
+      const id = $("resId").value.trim();
+      if (!id) throw new Error("resourceId is empty");
+      const data = await api("/api/resource/" + encodeURIComponent(id), { method: "GET", auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnResUpdate").onclick = async () => {
+    try {
+      const id = $("resId").value.trim();
+      if (!id) throw new Error("resourceId is empty");
+
+      const payload = {};
+      const t = $("updResTitle").value;
+      const c = $("updResCoverImage").value;
+      const n = $("updResNotes").value;
+
+
+      if (t.trim() !== "") payload.title = t;
+      if (c.trim() !== "") payload.coverImage = c;
+      if (n.trim() !== "") payload.notes = n;
+
+      const data = await api("/api/resource/" + encodeURIComponent(id), { method: "PUT", body: payload, auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+  $("btnResDelete").onclick = async () => {
+    try {
+      const id = $("resId").value.trim();
+      if (!id) throw new Error("resourceId is empty");
+      const data = await api("/api/resource/" + encodeURIComponent(id), { method: "DELETE", auth: true });
+      setOut(data);
+    } catch (e) {
+      setOut(e.message);
+    }
+  };
+
+
+  $("btnAniSearch").onclick = async () => {
+    try {
+      const title = $("aniQ").value.trim();
+      if (!title) throw new Error("query is empty");
+
+      const data = await api("/api/anilist/search?query=" + encodeURIComponent(title), { method: "GET" });
+      setOut(data);
+    } catch (e) {
+      setOut("AniList search error: " + e.message);
+    }
+  };
+
+  $("btnAniById").onclick = async () => {
+    try {
+      const id = $("aniId").value.trim();
+      if (!id) throw new Error("id is empty");
+      const data = await api("/api/anilist/" + encodeURIComponent(id), { method: "GET" });
+      setOut(data);
+    } catch (e) {
+      setOut("AniList by id error: " + e.message);
+    }
+  };
+</script>
+</body>
+</html>

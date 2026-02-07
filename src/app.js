@@ -1,6 +1,15 @@
 const express = require('express');
 const app = express();
 
+const path = require("path");
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
+
+
+
 // Middleware to parse JSON requests
 app.use(express.json());
 
@@ -15,6 +24,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/resource', resourceRoutes);   
 app.use('/api/anilist', anilistRoutes)
+
+const errorHandler = require("./middleware/errorHandler");
+
+app.use(errorHandler);
 
 // Health check endpoint
 app.get('/health', (req, res) => {res.json({ status:'ok'})});
