@@ -21,14 +21,7 @@ title: {
 
 notes: {type: String},
 
-
-coverImage:{
-    type: String
-}
-
-}, {timestamps:true}
-
-);
+});
 
 // Ensure a user cannot save the same anime more than 1 time
 resourceSchema.index({user:1, anilistId:1}, {unique:true});

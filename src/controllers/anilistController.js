@@ -18,7 +18,6 @@ exports.searchAnime = async (req, res, next) => {
                     episodes
                     format
                     averageScore
-                    coverImage {large}
                     siteUrl
                 }
             }
@@ -49,7 +48,6 @@ exports.getAnimeById = async (req, res, next) => {
             status
             averageScore
             genres
-            coverImage { large }
             siteUrl
             }
         }

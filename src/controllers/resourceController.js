@@ -8,14 +8,13 @@ exports.create = async (req,res, next) => {
         if (!userId) {return res.status(401).json({message: "Unauthoroized"})} 
 
         //taking all from req.body
-        const {anilistId, title, coverImage, notes} = req.body;
+        const {anilistId, title, notes} = req.body;
 
         //creating document in MongoDB
         const resource = await Resource.create({
             user: userId,
             anilistId,
             title,
-            coverImage,
             notes,
         });
         
@@ -94,13 +93,12 @@ exports.update = async (req,res, next) => {
         //taking id from url that we need to update 
         const {id} = req.params;
         //taking data from req.body
-        const {title, coverImage, notes} = req.body;
+        const {title, notes} = req.body;
 
         //emty object to contain what we need to change exactly
         const update = {};
         //put only what we need update to update object
         if (title !== undefined) {update.title = title; };
-        if (coverImage !== undefined) {update.coverImage = coverImage};
         if (notes !== undefined) {update.notes = notes};
     
         //updating anime

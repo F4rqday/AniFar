@@ -57,7 +57,6 @@
         <h4>Create</h4>
         <p>anilistId (number)<br><input id="resAniListId" type="number" placeholder="20" size="30"></p>
         <p>title<br><input id="resTitle" placeholder="Naruto" size="30"></p>
-        <p>coverImage (optional)<br><input id="resCoverImage"  size="30"></p>
         <p>notes (optional)<br><textarea id="resNotes" rows="4" cols="33" placeholder="bla-bla-bla"></textarea></p>
         <p><button id="btnResCreate">Add Anime</button></p>
 
@@ -79,7 +78,6 @@
 
         <h4>Update</h4>
         <p>title (optional)<br><input id="updResTitle" placeholder="new title" size="30"></p>
-        <p>coverImage (optional)<br><input id="updResCoverImage" placeholder="new url" size="30"></p>
         <p>notes (optional)<br><textarea id="updResNotes" rows="4" cols="33" placeholder="bla-bla-bla"></textarea></p>
         <p><button id="btnResUpdate">Update This Anime</button></p>
       </td>
@@ -252,7 +250,6 @@
       const payload = {
         anilistId: Number($("resAniListId").value),
         title: $("resTitle").value.trim(),
-        coverImage: $("resCoverImage").value.trim() || undefined,
         notes: $("resNotes").value.trim() || undefined
       };
       const data = await api("/api/resource", { method: "POST", body: payload, auth: true });
@@ -289,12 +286,10 @@
 
       const payload = {};
       const t = $("updResTitle").value;
-      const c = $("updResCoverImage").value;
       const n = $("updResNotes").value;
 
 
       if (t.trim() !== "") payload.title = t;
-      if (c.trim() !== "") payload.coverImage = c;
       if (n.trim() !== "") payload.notes = n;
 
       const data = await api("/api/resource/" + encodeURIComponent(id), { method: "PUT", body: payload, auth: true });
